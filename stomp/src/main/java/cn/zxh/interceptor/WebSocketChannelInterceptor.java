@@ -35,12 +35,11 @@ import org.springframework.util.StringUtils;
 @Slf4j
 public class WebSocketChannelInterceptor implements ChannelInterceptor {
     private static final String WEBSOCKET_TOKEN = "websocket_token";
-    //发送进入通道前
+    //消息进入通道前
     @SneakyThrows
     @Override
     //todo 针对不同的消息行为进行处理
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        log.info("发送进入通道前");
         //获取stomp消息头
         StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
@@ -56,20 +55,5 @@ public class WebSocketChannelInterceptor implements ChannelInterceptor {
             //todo websocket的token校验
         }
         return message;
-    }
-    //发送消息到达通道后
-    @Override
-    public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
-        log.info("发送消息到达通道后");
-    }
-    //通道发送消息完毕时
-    @Override
-    public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
-        log.info("通道发送消息完毕时");
-    }
-    //通道接收消息完毕时
-    @Override
-    public void afterReceiveCompletion(Message<?> message, MessageChannel channel, Exception ex) {
-        log.info("通道接收消息完毕时");
     }
 }
