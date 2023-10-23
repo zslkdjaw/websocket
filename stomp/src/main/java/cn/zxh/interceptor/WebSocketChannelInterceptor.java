@@ -1,5 +1,6 @@
 package cn.zxh.interceptor;
 
+import com.alibaba.fastjson.JSON;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;

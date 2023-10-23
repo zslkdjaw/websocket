@@ -1,61 +1,80 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WebSocket Test</title>
+    <title>WebSocket Client</title>
 </head>
 <body>
-    <h1>WebSocket Test</h1>
-    <input type="text" id="tokenInput" placeholder="输入 Token">
-    <button onclick="connect()">连接</button>
-    <button onclick="disconnect()">断开连接</button>
-    <br><br>
-    <input type="text" id="messageInput" placeholder="输入消息">
-    <button onclick="sendMessage()">发送消息</button>
+<h1>WebSocket Client</h1>
+<input type="text" id="tokenInput" placeholder="输入 Token">
+<button onclick="connect()">连接</button>
+<button onclick="disconnect()">断开连接</button>
+<br><br>
+<input type="text" id="messageInput" placeholder="输入消息">
+<button onclick="sendMessage()">发送消息</button>
 
-    <div id="messages"></div>
+<div id="messages"></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <script>
-        let stompClient = null;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+    let stompClient = null;
+    let token = null ;
 
-        function connect() {
-            const socket = new SockJS('http://localhost:8080/websocket');
-            
-            const tokenInput = document.getElementById('tokenInput');
-            const token = tokenInput.value;
+    function connect() {
+        const socket = new SockJS('http://localhost:8080/websocket');
 
-            const headers = {
-                'websocket_token': token
-            };
+        const tokenInput = document.getElementById('tokenInput');
+        token = tokenInput.value;
 
-            stompClient = Stomp.over(socket);
-            stompClient.connect(headers, function (frame) {
-                appendMessage('已连接');
-            });
+        const headers = {
+            'websocket_token': token
+        };
+
+        stompClient = Stomp.over(socket);
+        stompClient.connect(headers, function (frame) {
+
+            // 在连接成功后自动订阅消息
+            subscribePublic();
+            subscribeOne();
+        });
+        appendMessage('已连接');
+    }
+
+    function disconnect() {
+        if (stompClient !== null) {
+            stompClient.disconnect();
+            appendMessage('已断开连接');
         }
+    }
 
-        function disconnect() {
-            if (stompClient !== null) {
-                stompClient.disconnect();
-                appendMessage('已断开连接');
-            }
-        }
+    function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value;
+        stompClient.send("/app/receive/all", {}, JSON.stringify({"content": message ,"sendUserId": token}));
+        messageInput.value = '';
+        appendMessage('发送广播消息: ' + message);
+    }
 
-        function sendMessage() {
-            const messageInput = document.getElementById('messageInput');
-            const message = messageInput.value;
-            stompClient.send("/app/chat", {}, message);
-            messageInput.value = '';
-            appendMessage('发送消息: ' + message);
-        }
+    function appendMessage(message) {
+        const messages = document.getElementById('messages');
+        const p = document.createElement('p');
+        p.textContent = message;
+        messages.appendChild(p);
+    }
 
-        function appendMessage(message) {
-            const messages = document.getElementById('messages');
-            const p = document.createElement('p');
-            p.textContent = message;
-            messages.appendChild(p);
-        }
-    </script>
+    function subscribePublic() {
+        stompClient.subscribe("/app/topic/public", function (message) {
+            appendMessage('广播消息: ' + message.body);
+        });
+        appendMessage('已订阅广播消息');
+    }
+
+    function subscribeOne() {
+        stompClient.subscribe("/user/queue/reply", function (message) {
+            appendMessage('点对点消息: ' + message.body);
+        });
+        appendMessage('已订阅点对点消息');
+    }
+</script>
 </body>
 </html>
