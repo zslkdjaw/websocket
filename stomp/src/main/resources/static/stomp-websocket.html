@@ -63,7 +63,7 @@
     }
 
     function subscribePublic() {
-        stompClient.subscribe("/app/topic/public", function (message) {
+        stompClient.subscribe("/topic/public", function (message) {
             appendMessage('广播消息: ' + message.body);
         });
         appendMessage('已订阅广播消息');
