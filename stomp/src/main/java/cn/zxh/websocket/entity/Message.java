@@ -1,4 +1,4 @@
-package cn.zxh.entity;
+package cn.zxh.websocket.entity;
 
 import lombok.Data;
 

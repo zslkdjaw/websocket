@@ -1,4 +1,4 @@
-package cn.zxh.interceptor;
+package cn.zxh.websocket.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import lombok.SneakyThrows;

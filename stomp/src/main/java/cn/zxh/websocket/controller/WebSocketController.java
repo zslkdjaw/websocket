@@ -1,6 +1,6 @@
-package cn.zxh.controller;
+package cn.zxh.websocket.controller;
 
-import cn.zxh.entity.Message;
+import cn.zxh.websocket.entity.Message;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;

@@ -1,6 +1,6 @@
-package cn.zxh.config;
+package cn.zxh.websocket.config;
 
-import cn.zxh.interceptor.WebSocketChannelInterceptor;
+import cn.zxh.websocket.interceptor.WebSocketChannelInterceptor;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.stereotype.Component;
