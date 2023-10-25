@@ -10,8 +10,10 @@
 <button onclick="disconnect()">断开连接</button>
 <br><br>
 <input type="text" id="messageInput" placeholder="输入消息">
-<button onclick="sendMessage()">发送消息</button>
-
+<button onclick="sendPublicMessage()">发送广播消息</button>
+<input type="text" id="useridInput" placeholder="输入 UserId">
+<button onclick="subscribeOne()">订阅点对点消息</button>
+<button onclick="sendPrivateMessage()">发送点对点消息</button>
 <div id="messages"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
@@ -19,6 +21,7 @@
 <script>
     let stompClient = null;
     let token = null ;
+    let recUserId = null ;
 
     function connect() {
         const socket = new SockJS('http://localhost:8080/websocket');
@@ -33,9 +36,8 @@
         stompClient = Stomp.over(socket);
         stompClient.connect(headers, function (frame) {
 
-            // 在连接成功后自动订阅消息
+            // 在连接成功后自动广播订阅消息
             subscribePublic();
-            subscribeOne();
         });
         appendMessage('已连接');
     }
@@ -47,12 +49,22 @@
         }
     }
 
-    function sendMessage() {
+    function sendPublicMessage() {
         const messageInput = document.getElementById('messageInput');
         const message = messageInput.value;
         stompClient.send("/app/receive/all", {}, JSON.stringify({"content": message ,"sendUserId": token}));
         messageInput.value = '';
         appendMessage('发送广播消息: ' + message);
+    }
+    function sendPrivateMessage(){
+        if(recUserId == null || recUserId.length === 0){
+            alert("需要订阅对方,这样才能和对方私信聊天");
+            return ;
+        }
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value;
+        stompClient.send("/app/receive/one/"+recUserId,{},JSON.stringify({"content": message ,"sendUserId": token,"recUserId": recUserId}));
+
     }
 
     function appendMessage(message) {
@@ -70,10 +82,12 @@
     }
 
     function subscribeOne() {
-        stompClient.subscribe("/user/queue/reply", function (message) {
+        const useridInput = document.getElementById('useridInput');
+        recUserId = useridInput.value;
+        stompClient.subscribe("/user/"+recUserId+"/receive/one", function (message) {
             appendMessage('点对点消息: ' + message.body);
         });
-        appendMessage('已订阅点对点消息');
+        appendMessage('已订阅:'+recUserId+'的私聊消息,现在双方可以亲密交流了哦 >3<');
     }
 </script>
 </body>

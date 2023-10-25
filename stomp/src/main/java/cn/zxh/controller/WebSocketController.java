@@ -1,6 +1,7 @@
 package cn.zxh.controller;
 
 import cn.zxh.entity.Message;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -39,10 +40,11 @@ public class WebSocketController {
     public Message sendToVIPTopic(@Payload Message message){
         return message;
     }
-    //一对一
-    @MessageMapping("/receive/one")
-    public void sendToOne(@Payload Message message){
+    //todo 一对一
+    @MessageMapping("/receive/one/{userId}")
+    public void sendToOne(@Payload Message message, @DestinationVariable("userId") Long userId){
+        System.out.println("接收成功 recUserId :");
         //转化路径并发送
-        simpMessagingTemplate.convertAndSendToUser(message.getRecUserId(),"/user/receive/one",message);
+        simpMessagingTemplate.convertAndSendToUser(userId.toString(),"/user/receive/one",message);
     }
 }
